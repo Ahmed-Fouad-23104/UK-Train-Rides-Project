@@ -327,6 +327,36 @@ select * from Delay;
 select * from Journey;
 select * from TicketInfo;
 select * from railways;
+select * from RouteInfo;
+SELECT *
+FROM railway
+WHERE `Journey Status` = 'Delayed';
+CREATE TABLE DimDate (
+    DateKey INT PRIMARY KEY,
+    FullDate DATE,
+    Day INT,
+    Month INT,
+    MonthName VARCHAR(20),
+    Year INT,
+    Quarter INT
+);
+railway.[Date of Journey]  →  DimDate.FullDate
+SELECT 
+    r.[Transaction ID],
+    r.[Departure Station],
+    r.[Arrival Destination],
+    r.[Journey Status],
+    r.[Reason for Delay],
+    d.FullDate,
+    d.Day,
+    d.MonthName,
+    d.Year
+FROM railway r
+JOIN DimDate d 
+    ON CONVERT(DATE, r.[Date of Journey], 101) = d.FullDate
+WHERE r.[Journey Status] = 'Delayed';
+
+
 
 
 
