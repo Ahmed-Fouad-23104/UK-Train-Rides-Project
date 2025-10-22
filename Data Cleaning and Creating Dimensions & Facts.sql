@@ -328,11 +328,21 @@ select * from Journey;
 select * from TicketInfo;
 select * from railways;
 select * from RouteInfo;
-SELECT *
+INSERT INTO Delay (Transaction_ID, Journey_ID, Route_ID, Journey_Status, Reason_for_Delay, Refund_Request)
+SELECT 
+    Transaction ID,
+    Journey ID,
+    Route ID,
+    Journey Status,
+    Reason for Delay,
+    Refund Request
 FROM railway
-WHERE `Journey Status` = 'Delayed';
+WHERE Journey Status = 'Delayed';
+DELETE FROM railway
+WHERE Journey Status <> 'Delayed';
+
 CREATE TABLE DimDate (
-    DateKey INT PRIMARY KEY,
+    DateKey INT AUTO_INCREMENT PRIMARY KEY,
     FullDate DATE,
     Day INT,
     Month INT,
@@ -340,21 +350,29 @@ CREATE TABLE DimDate (
     Year INT,
     Quarter INT
 );
-railway.[Date of Journey]  →  DimDate.FullDate
+INSERT INTO DimDate (FullDate, Day, Month, MonthName, Year, Quarter)
+SELECT DISTINCT 
+    Date_of_Journey,
+    DAY(Date_of_Journey),
+    MONTH(Date_of_Journey),
+    MONTHNAME(Date_of_Journey),
+    YEAR(Date_of_Journey),
+    QUARTER(Date_of_Journey)
+FROM railway;
 SELECT 
-    r.[Transaction ID],
-    r.[Departure Station],
-    r.[Arrival Destination],
-    r.[Journey Status],
-    r.[Reason for Delay],
+    r.Transaction_ID,
+    r.Departure_Station,
+    r.Arrival_Destination,
+    r.Journey_Status,
+    r.Reason_for_Delay,
     d.FullDate,
     d.Day,
     d.MonthName,
     d.Year
 FROM railway r
 JOIN DimDate d 
-    ON CONVERT(DATE, r.[Date of Journey], 101) = d.FullDate
-WHERE r.[Journey Status] = 'Delayed';
+    ON DATE(r.Date_of_Journey) = d.FullDate
+WHERE r.Journey_Status = 'Delayed';
 
 
 
