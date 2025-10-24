@@ -313,7 +313,8 @@ JOIN Journey j
     ON rw.Transaction_ID = j.Transaction_ID  
 JOIN RouteInfo r
     ON rw.Departure_Station = r.Departure_Station 
-   AND rw.Arrival_Destination = r.Arrival_Destination;
+   AND rw.Arrival_Destination = r.Arrival_Destination
+where j.Journey_Status in ('Cancelled' , 'Delayed');
 
 
 SELECT COUNT(*) AS RailwaysCount FROM Railways;
@@ -328,18 +329,7 @@ select * from Journey;
 select * from TicketInfo;
 select * from railways;
 select * from RouteInfo;
-INSERT INTO Delay (Transaction_ID, Journey_ID, Route_ID, Journey_Status, Reason_for_Delay, Refund_Request)
-SELECT 
-    Transaction ID,
-    Journey ID,
-    Route ID,
-    Journey Status,
-    Reason for Delay,
-    Refund Request
-FROM railway
-WHERE Journey Status = 'Delayed';
-DELETE FROM railway
-WHERE Journey Status <> 'Delayed';
+
 
 CREATE TABLE DimDate (
     DateKey INT AUTO_INCREMENT PRIMARY KEY,
@@ -373,6 +363,7 @@ FROM railway r
 JOIN DimDate d 
     ON DATE(r.Date_of_Journey) = d.FullDate
 WHERE r.Journey_Status = 'Delayed';
+
 
 
 
