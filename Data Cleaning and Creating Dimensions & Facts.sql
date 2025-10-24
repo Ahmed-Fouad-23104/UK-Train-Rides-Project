@@ -211,7 +211,7 @@ alter column Refund_Request nvarchar(255) not null;
 
 -- All columns are not null except the Actual Arrival Time column
 
--- Ticket Info Table (Dimension)
+-- Ticket Info Table (Fact)
 CREATE TABLE TicketInfo (
     Transaction_ID nvarchar(255) PRIMARY KEY, 
     Date_of_Purchase DATE not null,
@@ -242,7 +242,7 @@ FROM Railways;
 Alter table TicketInfo
 Alter column Time_of_Purchase time(0) not null;
 ----------------------------------------------------------------------------------------
--- Route Info Table
+-- Route Info Table (Dimension)
 CREATE TABLE RouteInfo (
     Route_ID INT IDENTITY(1,1) PRIMARY KEY,
     Departure_Station nvarchar(255) not null,
@@ -258,7 +258,7 @@ FROM Railways;
 Select COUNT(*) from RouteInfo;
 -- ----------------------------------------------------------------------------
 
--- Journey Table
+-- Journey Table (Dimension)
 CREATE TABLE Journey (
     Journey_ID INT IDENTITY(1,1) PRIMARY KEY,
 	Transaction_ID nvarchar(255) UNIQUE not null,
@@ -285,7 +285,7 @@ FROM Railways;
 
 --------------------------------------------------------------------------------
 
--- Delay Table (Fact)
+-- Delay Table (Dimension)
 
 CREATE TABLE Delay (
     Delay_ID INT IDENTITY(1,1) PRIMARY KEY,
@@ -315,12 +315,34 @@ JOIN RouteInfo r
     ON rw.Departure_Station = r.Departure_Station 
    AND rw.Arrival_Destination = r.Arrival_Destination
 where j.Journey_Status in ('Cancelled' , 'Delayed');
+----------------------------------------------------------------------------------------
+
+-- Date (Dimension)
+
+CREATE TABLE Date (
+    DateKey INT Identity(1,1) PRIMARY KEY,
+    FullDate DATE,
+    Day INT,
+    Month INT,
+    Year INT
+);
+
+INSERT INTO Date (FullDate, Day, Month, Year)
+SELECT DISTINCT 
+    Date_of_Journey,
+    DAY(Date_of_Journey),
+    MONTH(Date_of_Journey),
+    YEAR(Date_of_Journey)
+FROM railways;
+
+-------------------------------------------------------------------------------------------------------------
 
 
 SELECT COUNT(*) AS RailwaysCount FROM Railways;
 SELECT COUNT(*) AS JourneyCount FROM Journey;
 SELECT COUNT(*) AS TicketInfoCount FROM TicketInfo;
 SELECT COUNT(*) AS DelayCount FROM Delay;
+SELECT COUNT(*) AS DelayCount FROM Date;
 
 select * from RouteInfo
 order by Route_ID;
@@ -329,40 +351,11 @@ select * from Journey;
 select * from TicketInfo;
 select * from railways;
 select * from RouteInfo;
+select * from Date;
 
 
-CREATE TABLE DimDate (
-    DateKey INT AUTO_INCREMENT PRIMARY KEY,
-    FullDate DATE,
-    Day INT,
-    Month INT,
-    MonthName VARCHAR(20),
-    Year INT,
-    Quarter INT
-);
-INSERT INTO DimDate (FullDate, Day, Month, MonthName, Year, Quarter)
-SELECT DISTINCT 
-    Date_of_Journey,
-    DAY(Date_of_Journey),
-    MONTH(Date_of_Journey),
-    MONTHNAME(Date_of_Journey),
-    YEAR(Date_of_Journey),
-    QUARTER(Date_of_Journey)
-FROM railway;
-SELECT 
-    r.Transaction_ID,
-    r.Departure_Station,
-    r.Arrival_Destination,
-    r.Journey_Status,
-    r.Reason_for_Delay,
-    d.FullDate,
-    d.Day,
-    d.MonthName,
-    d.Year
-FROM railway r
-JOIN DimDate d 
-    ON DATE(r.Date_of_Journey) = d.FullDate
-WHERE r.Journey_Status = 'Delayed';
+
+   
 
 
 
