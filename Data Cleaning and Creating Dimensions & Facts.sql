@@ -314,7 +314,7 @@ JOIN Journey j
 JOIN RouteInfo r
     ON rw.Departure_Station = r.Departure_Station 
    AND rw.Arrival_Destination = r.Arrival_Destination
-where j.Journey_Status in ('Cancelled' ; 'Delayed');
+where j.Journey_Status in ('Cancelled' , 'Delayed');
 ----------------------------------------------------------------------------------------
 
 -- Date (Dimension)
@@ -350,4 +350,5 @@ select * from TicketInfo;
 select * from railways;
 select * from RouteInfo;
 select * from Date;
+
 
