@@ -337,7 +337,31 @@ FROM railways;
 
 -------------------------------------------------------------------------------------------------------------
 
+-- Switching 'Weather' to 'Weather Conditions'
+Update Delay
+set Reason_for_Delay = 'Weather Conditions'
+where Reason_for_Delay = 'Weather'; 
+----------------------------------------------------------------------------------------
 
+-- Date (Dimension)
+
+CREATE TABLE Date (
+    DateKey INT Identity(1,1) PRIMARY KEY,
+    FullDate DATE,
+    Day INT,
+    Month INT,
+    Year INT
+);
+
+INSERT INTO Date (FullDate, Day, Month, Year)
+SELECT DISTINCT 
+    Date_of_Journey,
+    DAY(Date_of_Journey),
+    MONTH(Date_of_Journey),
+    YEAR(Date_of_Journey)
+FROM railways;
+
+------------------------------------------------------------------------------------------------------------
 SELECT COUNT(*) AS RailwaysCount FROM Railways;
 SELECT COUNT(*) AS JourneyCount FROM Journey;
 SELECT COUNT(*) AS TicketInfoCount FROM TicketInfo;
