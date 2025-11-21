@@ -315,6 +315,27 @@ JOIN RouteInfo r
     ON rw.Departure_Station = r.Departure_Station 
    AND rw.Arrival_Destination = r.Arrival_Destination
 where j.Journey_Status in ('Cancelled' , 'Delayed');
+----------------------------------------------------------------------------------------
+
+-- Date (Dimension)
+
+CREATE TABLE Date (
+    DateKey INT Identity(1,1) PRIMARY KEY,
+    FullDate DATE,
+    Day INT,
+    Month INT,
+    Year INT
+);
+
+INSERT INTO Date (FullDate, Day, Month, Year)
+SELECT DISTINCT 
+    Date_of_Journey,
+    DAY(Date_of_Journey),
+    MONTH(Date_of_Journey),
+    YEAR(Date_of_Journey)
+FROM railways;
+
+-------------------------------------------------------------------------------------------------------------
 
 -- Switching 'Weather' to 'Weather Conditions'
 Update Delay
@@ -355,6 +376,13 @@ select * from TicketInfo;
 select * from railways;
 select * from RouteInfo;
 select * from Date;
+
+
+
+   
+
+
+
 
 
 
