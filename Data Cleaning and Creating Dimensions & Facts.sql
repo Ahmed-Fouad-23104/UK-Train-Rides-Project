@@ -241,6 +241,38 @@ FROM Railways;
 
 Alter table TicketInfo
 Alter column Time_of_Purchase time(0) not null;
+
+-- Adding Route_ID FK
+ALTER TABLE TicketInfo
+ADD Route_ID INT;
+
+UPDATE t
+SET t.Route_ID = r.Route_ID
+FROM TicketInfo t
+JOIN Railways rw
+    ON t.Transaction_ID = rw.Transaction_ID
+JOIN RouteInfo r
+    ON rw.Departure_Station = r.Departure_Station
+   AND rw.Arrival_Destination = r.Arrival_Destination;
+
+ALTER TABLE TicketInfo
+ADD CONSTRAINT FK_TicketInfo_Route
+FOREIGN KEY (Route_ID) REFERENCES RouteInfo(Route_ID);
+
+-- Adding Journey_ID FK
+ALTER TABLE TicketInfo
+ADD Journey_ID INT;
+
+UPDATE t
+SET t.Journey_ID = j.Journey_ID
+FROM TicketInfo t
+JOIN Journey j
+    ON t.Transaction_ID = j.Transaction_ID;
+
+ALTER TABLE TicketInfo
+ADD CONSTRAINT FK_TicketInfo_Journey
+FOREIGN KEY (Journey_ID) REFERENCES Journey(Journey_ID);
+
 ----------------------------------------------------------------------------------------
 -- Route Info Table (Dimension)
 CREATE TABLE RouteInfo (
@@ -283,9 +315,23 @@ SELECT
     Journey_Status
 FROM Railways;
 
+-- Adding DateKey FK
+ALTER TABLE Journey
+ADD DateKey INT;
+
+UPDATE j
+SET j.DateKey = d.DateKey
+FROM Date d
+JOIN Journey j
+    ON j.Date_of_Journey = d.FullDate;
+
+ALTER TABLE Journey
+ADD CONSTRAINT FK_Journey_Date
+FOREIGN KEY (DateKey) REFERENCES Date(DateKey);
+
 --------------------------------------------------------------------------------
 
--- Delay Table (Dimension)
+-- Delay Table (Fact)
 
 CREATE TABLE Delay (
     Delay_ID INT IDENTITY(1,1) PRIMARY KEY,
@@ -380,6 +426,7 @@ select * from Date;
 
 
    
+
 
 
 
