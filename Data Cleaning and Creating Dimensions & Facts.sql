@@ -315,6 +315,20 @@ SELECT
     Journey_Status
 FROM Railways;
 
+-- Adding DateKey FK
+ALTER TABLE Journey
+ADD DateKey INT;
+
+UPDATE j
+SET j.DateKey = d.DateKey
+FROM Date d
+JOIN Journey j
+    ON j.Date_of_Journey = d.FullDate;
+
+ALTER TABLE Journey
+ADD CONSTRAINT FK_Journey_Date
+FOREIGN KEY (DateKey) REFERENCES Date(DateKey);
+
 --------------------------------------------------------------------------------
 
 -- Delay Table (Fact)
