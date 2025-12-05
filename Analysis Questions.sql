@@ -142,4 +142,154 @@ group by Reason_for_Delay
 order by Refunded_Asked desc;
 -- -----------------------------------------------------------
 
+-- 18) Top Causes for Cancelled Trips
+SELECT Reason_for_Delay, COUNT(*) AS Times
+FROM Delay
+WHERE Journey_Status = 'Cancelled'
+GROUP BY Reason_for_Delay
+ORDER BY Times DESC;
+
+-- ------------------------------------------------------------
+
+-- 19) Months with Most Delayed and Cancelled Journeys
+SELECT
+    DATENAME(MONTH, Date_of_Journey) AS Month_Name,
+    MONTH(Date_of_Journey) AS Month_Number,
+    YEAR(Date_of_Journey) AS Year_Number,
+    COUNT(*) AS Total_Disruptions
+FROM Journey
+WHERE Journey_Status IN ('Delayed', 'Cancelled')
+GROUP BY 
+    DATENAME(MONTH, Date_of_Journey),
+    MONTH(Date_of_Journey),
+    YEAR(Date_of_Journey)
+ORDER BY 
+	Total_Disruptions DESC;
+
+-- ----------------------------------------------------
+
+-- 20) Top Stations with Cancelled Journeys
+SELECT Top 10 Departure_Station, COUNT(*) AS Disruptions
+FROM Journey
+WHERE Journey_Status = 'Cancelled'
+GROUP BY Departure_Station
+ORDER BY Disruptions DESC;
+
+-- -----------------------------------------------------
+
+-- 21) Top Stations with Delayed Journeys
+SELECT Top 10 Departure_Station, COUNT(*) AS Disruptions
+FROM Journey
+WHERE Journey_Status = 'Delayed'
+GROUP BY Departure_Station
+ORDER BY Disruptions DESC;
+
+-- ----------------------------------------------------
+
+-- 22) Best Route Perfomrance
+SELECT Top 10 r.Departure_Station, r.Arrival_Destination, r.Route_ID, COUNT(*) as Delayed
+from Delay d
+join RouteInfo r 
+on d.Route_ID  = r.Route_ID 
+where Journey_Status IN ('Delayed', 'Cancelled')
+GROUP BY 
+    r.Departure_Station,
+    r.Arrival_Destination,
+	r.Route_ID
+ORDER BY Delayed ASC;
+
+-- ---------------------------------------------------------
+
+-- 23) Top 10 Routes with Most Cancelled
+SELECT Top 10 r.Departure_Station, r.Arrival_Destination, r.Route_ID, COUNT(*) as Delayed
+from Delay d
+join RouteInfo r 
+on d.Route_ID  = r.Route_ID 
+where Journey_Status = 'Cancelled'
+GROUP BY 
+    r.Departure_Station,
+    r.Arrival_Destination,
+	r.Route_ID
+ORDER BY Delayed DESC;
+-- ----------------------------------------------------
+
+-- 24) Top 10 Routes with Revenue
+SELECT TOP 10
+    r.Route_ID,
+    r.Departure_Station,
+    r.Arrival_Destination,
+
+    -- Total revenue from all tickets on this route
+    SUM(t.Price) AS Total_Revenue,
+
+    -- Total refunded ticket value
+    SUM(
+        CASE 
+            WHEN d.Refund_Request = 'Yes' THEN t.Price 
+            ELSE 0 
+        END
+    ) AS Total_Refunds,
+
+    -- Net revenue after subtracting refunds
+    SUM(t.Price) 
+    - SUM(
+        CASE 
+            WHEN d.Refund_Request = 'Yes' THEN t.Price 
+            ELSE 0 
+        END
+    ) AS Net_Revenue
+
+FROM TicketInfo t
+JOIN RouteInfo r
+    ON t.Route_ID = r.Route_ID
+LEFT JOIN Delay d
+    ON t.Transaction_ID = d.Transaction_ID
+GROUP BY 
+    r.Route_ID,
+    r.Departure_Station,
+    r.Arrival_Destination
+ORDER BY Net_Revenue DESC;
+
+-- ----------------------------------------------------
+
+-- 25) Top 10 Routes Rev 2024
+SELECT TOP 10
+    r.Departure_Station,
+    SUM(t.Price) AS Total_Revenue
+FROM TicketInfo t
+JOIN RouteInfo r
+    ON t.Route_ID = r.Route_ID
+LEFT JOIN Delay d
+    ON t.Transaction_ID = d.Transaction_ID
+WHERE d.Refund_Request != 'Yes' OR d.Refund_Request IS NULL
+GROUP BY r.Departure_Station
+ORDER BY Total_Revenue DESC;
+
+-- -----------------------------------------------------------
+
+-- 26) April Avg Price
+
+SELECT ROUND(AVG(t.Price), 2) AS Avg_Ticket_Price_April_2024
+FROM TicketInfo t
+JOIN Journey j
+    ON t.Journey_ID = j.Journey_ID
+WHERE MONTH(j.Date_of_Journey) = 4
+  AND YEAR(j.Date_of_Journey) = 2024;
+-- -----------------------------------------------------------
+
+-- 27) April Total Journeys
+SELECT COUNT(*) AS Total_Journeys_April_2024
+FROM Journey
+WHERE MONTH(Date_of_Journey) = 4
+  AND YEAR(Date_of_Journey) = 2024;
+
+-- -----------------------------------------------------------
+
+-- 28) April Delayed Journeys
+SELECT COUNT(*) AS Delayed_Cancelled_April_2024
+FROM Journey
+WHERE MONTH(Date_of_Journey) = 4
+  AND YEAR(Date_of_Journey) = 2024
+  AND Journey_Status IN ('Delayed', 'Cancelled');
+
 
