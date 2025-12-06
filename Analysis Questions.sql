@@ -292,4 +292,14 @@ WHERE MONTH(Date_of_Journey) = 4
   AND YEAR(Date_of_Journey) = 2024
   AND Journey_Status IN ('Delayed', 'Cancelled');
 
+-- -------------------------------------------------------
+
+-- 29) April Total Revenue
+  SELECT Sum(t.Price) AS April_2024_Total_Revenue
+FROM TicketInfo t
+JOIN Journey j
+    ON t.Journey_ID = j.Journey_ID
+WHERE MONTH(j.Date_of_Journey) = 4
+  AND YEAR(j.Date_of_Journey) = 2024;
+
 
